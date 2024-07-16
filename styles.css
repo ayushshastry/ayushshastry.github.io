@@ -1,0 +1,10 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+#histogram {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+}
