@@ -1,14 +1,29 @@
 * {
     box-sizing: border-box;
 }
-
+h1 {
+    text-align: center;
+}
+h2 {
+    text-align: center;
+}
 body {
     font-family: 'Times New Roman', Times, serif
 }
 
-#histogram {
+.slideshow {
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 20px;
+}
+
+#tooltip {
+    opacity: 0;
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 40px;
+    background-color: white;
+    border: 1px;
 }

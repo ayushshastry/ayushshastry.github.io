@@ -5,7 +5,7 @@ d3.csv("arrestsUse.csv").then(function(data) {
     schoolHist(data);
     console.log(data);
     console.log("col names:", Object.keys(data[0]));
-    ageHist();
+    ageHist(data);
     raceDist();
     genderHist();
 }).catch(function(error) {
@@ -16,7 +16,7 @@ console.log("data loaded");
 
 function schoolHist(data) {
     // create margins and dimensions
-    var margin = {right: 50, left: 50, top: 50, bottom: 50};
+    var margin = {right: 50, left: 80, top: 30, bottom: 40};
     var width = 900 - margin.right - margin.left;
     var height = 600 - margin.top - margin.bottom;
 
@@ -24,8 +24,9 @@ function schoolHist(data) {
 
     const svg = d3.select("#schoolHistogram")
                     .append("svg")
-                    .attr("width", 900)
-                    .attr("height", 600);
+                    .attr("viewBox", [0, 0, width, height])
+                    .attr("width", 700)
+                    .attr("height", 400);
       
 
     // get counts of each categorical variable
@@ -63,7 +64,8 @@ function schoolHist(data) {
     svg.append("g")
         .attr("transform", "translate("+margin.left+", "+0+")")
         .call(d3.axisLeft(y));
-    
+    var tooltip = d3.select("#tooltip");
+
     svg.selectAll()
         .data(schoolArray)
         .join("rect")
@@ -71,13 +73,75 @@ function schoolHist(data) {
         .attr("x", function(schoolArray) { return x(schoolArray.key); })
         .attr("y", function(schoolArray) { return y(schoolArray.value); })
         .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
-        .attr("transform", "translate("+(margin.left - 45)+", "+0+")")
-        .attr("width", x.bandwidth());
-
+        .attr("width", x.bandwidth())
+        .on("mousover", function(schoolArray) {
+            tooltip.style("opacity", 1)
+                   .style("left", (d3.event.pageX) + "px")
+                   .style("top", (d3.event.pageY) + "py")
+                   .html("Number of Arrests: " +(schoolArray.value)) 
+        })
+        .on("mouseout", function() { tooltip.style("opacity", 0) });
 }
 
-function ageHist() {
-    return 0;
+function ageHist(data) {
+    // create margins and dimensions
+    var margin = {right: 50, left: 80, top: 30, bottom: 40};
+    var width = 900 - margin.right - margin.left;
+    var height = 600 - margin.top - margin.bottom;
+
+    // create svg container
+
+    const svg = d3.select("#genderHistogram")
+                    .append("svg")
+                    .attr("viewBox", [0, 0, width, height])
+                    .attr("width", 700)
+                    .attr("height", 400);
+      
+
+    // get counts of each categorical variable
+
+    const genders = d3.rollup(data, function(v) { return v.length; }, function(d) { return d.gender; });
+    console.log(genders.values());
+
+    for (let key of genders.keys()) {
+        console.log(key);
+    }
+
+    for (let value of genders.values()) {
+        console.log(value);
+    }
+
+    const gendersArray = Array.from(genders, ([key, value]) => ({key, value}));
+    console.log(gendersArray);
+
+    // create scales
+    const x = d3.scaleBand()
+        .domain(["Male", "Female"])
+        .range([margin.left, width - margin.right])
+        .padding(0.15);
+
+    const y = d3.scaleLinear()
+        .domain([0, 26000])
+        .range([height - margin.bottom, margin.top]);
+
+
+    // create axes
+    svg.append("g")
+        .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
+        .call(d3.axisBottom(x));
+    
+    svg.append("g")
+        .attr("transform", "translate("+margin.left+", "+0+")")
+        .call(d3.axisLeft(y));
+    
+    svg.selectAll()
+        .data(gendersArray)
+        .join("rect")
+        .attr("fill", "steelblue")
+        .attr("x", function(gendersArray) { return x(gendersArray.key); })
+        .attr("y", function(gendersArray) { return y(gendersArray.value); })
+        .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
+        .attr("width", x.bandwidth());
 }
 
 function raceDist() {
