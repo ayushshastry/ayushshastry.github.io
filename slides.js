@@ -2,12 +2,12 @@ console.log("loading data");
 
 
 d3.csv("arrestsUse.csv").then(function(data) {
-    schoolHist(data);
     console.log(data);
     console.log("col names:", Object.keys(data[0]));
+    schoolHist(data);
+    raceDist(data);
+    genderHist(data);
     ageHist(data);
-    raceDist();
-    genderHist();
 }).catch(function(error) {
     console.log(error);
 });
@@ -17,8 +17,8 @@ console.log("data loaded");
 function schoolHist(data) {
     // create margins and dimensions
     var margin = {right: 50, left: 80, top: 30, bottom: 40};
-    var width = 900 - margin.right - margin.left;
-    var height = 600 - margin.top - margin.bottom;
+    var width = 700 - margin.right - margin.left;
+    var height = 400 - margin.top - margin.bottom;
 
     // create svg container
 
@@ -52,8 +52,10 @@ function schoolHist(data) {
         .padding(0.15);
 
     const y = d3.scaleLinear()
-        .domain([0, 26000])
+        .domain([0, 24000])
         .range([height - margin.bottom, margin.top]);
+    
+    const coloring = d3.scaleOrdinal().domain(["0", "1"]).range(d3.schemeCategory10);
 
 
     // create axes
@@ -69,25 +71,18 @@ function schoolHist(data) {
     svg.selectAll()
         .data(schoolArray)
         .join("rect")
-        .attr("fill", "steelblue")
+        .attr("fill", function(schoolArray) { return coloring(schoolArray.key); })
         .attr("x", function(schoolArray) { return x(schoolArray.key); })
         .attr("y", function(schoolArray) { return y(schoolArray.value); })
         .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
-        .attr("width", x.bandwidth())
-        .on("mousover", function(schoolArray) {
-            tooltip.style("opacity", 1)
-                   .style("left", (d3.event.pageX) + "px")
-                   .style("top", (d3.event.pageY) + "py")
-                   .html("Number of Arrests: " +(schoolArray.value)) 
-        })
-        .on("mouseout", function() { tooltip.style("opacity", 0) });
+        .attr("width", x.bandwidth());
 }
 
-function ageHist(data) {
+function genderHist(data) {
     // create margins and dimensions
     var margin = {right: 50, left: 80, top: 30, bottom: 40};
-    var width = 900 - margin.right - margin.left;
-    var height = 600 - margin.top - margin.bottom;
+    var width = 700 - margin.right - margin.left;
+    var height = 400 - margin.top - margin.bottom;
 
     // create svg container
 
@@ -121,9 +116,10 @@ function ageHist(data) {
         .padding(0.15);
 
     const y = d3.scaleLinear()
-        .domain([0, 26000])
+        .domain([0, 21000])
         .range([height - margin.bottom, margin.top]);
 
+    const coloring = d3.scaleOrdinal().domain(["Male", "Female"]).range(d3.schemeCategory10);
 
     // create axes
     svg.append("g")
@@ -137,75 +133,119 @@ function ageHist(data) {
     svg.selectAll()
         .data(gendersArray)
         .join("rect")
-        .attr("fill", "steelblue")
+        .attr("fill", function(gendersArray) { return coloring(gendersArray.key); })
         .attr("x", function(gendersArray) { return x(gendersArray.key); })
         .attr("y", function(gendersArray) { return y(gendersArray.value); })
         .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
         .attr("width", x.bandwidth());
 }
 
-function raceDist() {
-    return 0;
+function raceDist(data) {
+
+    const svg = d3.select("#raceHistogram")
+                .append("svg")
+                .attr("width", 1000)
+                .attr("height", 600)
+    
+    var margin = {right: 50, left: 80, top: 30, bottom: 150};
+    var width = 1000 - margin.right - margin.left;
+    var height = 600 - margin.top - margin.bottom;
+    
+    const race = d3.rollup(data, function(v) { return v.length; }, function(d) { return d.race; });
+    console.log(race);
+
+    for (let key of race.keys()) {
+        console.log(key);
+    }
+
+    for (let value of race.values()) {
+        console.log(value);
+    }
+
+    const raceArray = Array.from(race, ([key, value]) => ({key, value}));
+    console.log(raceArray);
+
+    const x = d3.scaleBand()
+            .domain(raceArray.map(function(d) { return d.key; }))
+            .range([margin.left, width])
+            .padding(0.15)
+
+    const y = d3.scaleLinear()
+    .domain([0, d3.max(raceArray, function(d) { return d.value + 2000; })]) // Corrected domain definition
+    .range([height - margin.bottom, margin.top]);
+
+    const coloring = d3.scaleOrdinal().domain(raceArray.map(function(d) { return d.key; })).range(d3.schemeCategory10);
+
+    svg.append("g")
+        .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
+        .call(d3.axisBottom(x))
+    
+    svg.append("g")
+        .attr("transform", "translate("+margin.left+", "+0+")")
+        .call(d3.axisLeft(y))
+
+
+
+    svg.selectAll()
+        .data(raceArray)
+        .join("rect")
+        .attr("fill", function(d) { return coloring(d.key); })
+        .attr("x", function(d) { return x(d.key); })
+        .attr("y", function(d) { return y(d.value); })
+        .attr("height", function(d) { return y(0) - y(d.value);})
+        .attr("width", x.bandwidth());
+
 }
 
-function genderHist() {
-    return 0;
+function ageHist(data) {
+    const svg = d3.select("#ageHistogram")
+                .append("svg")
+                .attr("width", 700)
+                .attr("height", 400)
+    
+    var margin = {right: 50, left: 80, top: 30, bottom: 40};
+    var width = 700 - margin.right - margin.left;
+    var height = 400 - margin.top - margin.bottom;
+
+    const x = d3.scaleLinear()
+                .domain([0, d3.max(data, function(d) { return d.age; })])
+                .range([margin.left, width - margin.right]);
+
+    
+    const histogram = d3.histogram()
+                        .value(function(d) { return d.age; })
+                        .domain(x.domain())
+                        .thresholds(x.ticks(10));
+
+    const bins = histogram(data)
+
+    console.log(bins);
+
+    const y = d3.scaleLinear()
+                .domain([0, d3.max(bins, function(d) { return d.length + 1000; })])
+                .range([height - margin.bottom, margin.top]);
+
+
+    svg.append("g")
+        .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
+        .call(d3.axisBottom(x));
+    
+    svg.append("g")
+        .attr("transform", "translate("+margin.left+", "+0+")")
+        .call(d3.axisLeft(y));
+    
+    svg.selectAll()
+        .data(bins)
+        .join("rect")
+        .attr("fill", "steelblue")
+        .attr("height", 20)
+        .attr("width", 20)
+        .attr("x", (height - margin.bottom))
+        .attr("y", margin.left)
+        .transition().delay(function(d, i) { return i * 250; })
+        .attr("x", function(d) { return x(d.x0); })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
+        .attr("y", function(d) { return y(d.length); })
+        .attr("height", function(d) { return y(0) - y(d.length); });
+    
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// console.log("loading data");
-//         d3.csv("newArrests.csv").then(function(data) {
-
-//             console.log("loaded data successfully");
-//             console.log(data);
-
-//             var margin = {top : 10, right: 10, bottom: 40, left: 40},
-//             width = 500 - margin.left - margin.right,
-//             height = 500 - margin.top - margin.bottom;
-
-//             var svg = d3.select("#histogram")
-//                     .append("svg")
-//                     .attr("width", width + margin.left + margin.right)
-//                     .attr("height", height + margin.top + margin.bottom)
-//                     .append("g")
-//                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-//             var x = d3.scaleLinear().domain([0, d3.max(data, function(d) {return +d.Age;})]).range([0, width]);
-
-//             svg.append("g")
-//             .attr("transform", "translate(0," + height + ")")
-//             .call(d3.axisBottom(x));
-
-//             var histogram = d3.histogram()
-//                             .value(function(d) { return +d.Age; })
-//                             .domain(x.domain())
-//                             .thresholds(x.ticks(70));
-
-//             var bins = histogram(data);
-
-//             var y = d3.scaleLinear().range([height, 0]).domain([0, d3.max(bins, function(d) { return d.length; })]);
-
-//             svg.append("g").call(d3.axisLeft(y));
-
-//             svg.selectAll("rect")
-//                 .data(bins)
-//                 .enter()
-//                 .append("rect")
-//                 .attr("x", function(d) { return x(d.x0) + 1; })
-//                 .attr("y", function(d) { return y(d.length); })
-//                 .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
-//                 .attr("height", function(d) { return height - y(d.length); })
-//                 .style("fill", "blue");
-//         }).catch(function(error) {
-//             console.log(error);
-//         });
