@@ -1,3 +1,5 @@
+
+
 console.log("loading data");
 
 
@@ -66,16 +68,48 @@ function schoolHist(data) {
     svg.append("g")
         .attr("transform", "translate("+margin.left+", "+0+")")
         .call(d3.axisLeft(y));
-    var tooltip = d3.select("#tooltip");
+    //var tooltip = d3.select("#tooltip");
 
     svg.selectAll()
         .data(schoolArray)
         .join("rect")
         .attr("fill", function(schoolArray) { return coloring(schoolArray.key); })
+        .attr("height", 20)
+        .attr("width", 20)
+        .attr("x", (height - margin.bottom))
+        .attr("y", margin.left)
+        .transition().delay(function(d, i) { return i * 250; })
         .attr("x", function(schoolArray) { return x(schoolArray.key); })
         .attr("y", function(schoolArray) { return y(schoolArray.value); })
         .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
         .attr("width", x.bandwidth());
+       
+        const annotations = [
+            {
+                note: { label: "Not near schools: 21,508 arrests "},
+                data: { school: "0", count: schoolArray[0].value},
+                dy: 20,
+                dx: 160
+            },
+            {
+                note: { label: "Near school zones: 2,002 arrests " },
+                data: { school: "1", count: schoolArray[1].value },
+                dy: -40,
+                dx: 70
+            }
+        ];
+    
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationLabel)
+            .accessors({
+                x: d => x(d.school) + x.bandwidth() / 2.15,
+                y: d => y(d.count)
+            })
+            .annotations(annotations);
+    
+        svg.append("g")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations);
 }
 
 function genderHist(data) {
@@ -134,10 +168,43 @@ function genderHist(data) {
         .data(gendersArray)
         .join("rect")
         .attr("fill", function(gendersArray) { return coloring(gendersArray.key); })
+        .attr("height", 20)
+        .attr("width", 20)
+        .attr("x", (height - margin.bottom))
+        .attr("y", margin.left)
+        .transition().delay(function(d, i) { return i * 250; })
         .attr("x", function(gendersArray) { return x(gendersArray.key); })
         .attr("y", function(gendersArray) { return y(gendersArray.value); })
         .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
         .attr("width", x.bandwidth());
+
+        // Add annotations
+    const annotations = [
+        {
+            note: {title: "Number of arrested Men: " + gendersArray[0].value},
+            data: { gender: gendersArray[0].key, value: gendersArray[0].value },
+            dy: -10,
+            dx: 10
+        },
+        {
+            note: {title: "Number of arrested Females: " + gendersArray[1].value},
+            data: { gender: gendersArray[1].key, value: gendersArray[1].value },
+            dy: -125,
+            dx: 25
+        }
+    ];
+
+    const makeAnnotations = d3.annotation()
+        .type(d3.annotationCallout)
+        .accessors({
+            x: d => x(d.gender) + x.bandwidth() / 2,
+            y: d => y(d.value)
+        })
+        .annotations(annotations);
+
+    svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations);
 }
 
 function raceDist(data) {
@@ -185,15 +252,69 @@ function raceDist(data) {
         .call(d3.axisLeft(y))
 
 
-
     svg.selectAll()
         .data(raceArray)
         .join("rect")
         .attr("fill", function(d) { return coloring(d.key); })
+        .attr("height", 20)
+        .attr("width", 20)
+        .attr("x", (height))
+        .attr("y", margin.left - 50)
+        .transition().delay(function(d, i) { return i * 250; })
         .attr("x", function(d) { return x(d.key); })
         .attr("y", function(d) { return y(d.value); })
         .attr("height", function(d) { return y(0) - y(d.value);})
         .attr("width", x.bandwidth());
+    // Add annotations
+    const annotations = [
+        {
+            note: {title: "Highest Number of Arrests: " + raceArray[1].value},
+            data: { race: raceArray[1].key, value: raceArray[1].value },
+            dy: -20,
+            dx: -75
+        },
+        {
+            note: {title: "Lowest Number of Arrests: " + raceArray[5].value},
+            data: { race: raceArray[5].key, value: raceArray[5].value },
+            dy: -125,
+            dx: 25
+        },
+    ];
+
+    const anotherAnnotation = [{
+        note: {title: "Black and White Americans made up " + ((raceArray[1].value + raceArray[2].value) / 23510) * 100 + "% of all arrests from 2021-2023"},
+        data: {race: raceArray[2].key, value: raceArray[2].value},
+        dy: 30,
+        dx: 70,
+        subject: {
+            radius: 30,
+            radiusPadding: 10
+        }
+    }];
+
+    const makeAnnotations = d3.annotation()
+        .type(d3.annotationCallout)
+        .accessors({
+            x: d => x(d.race) + x.bandwidth() / 2,
+            y: d => y(d.value)
+        })
+        .annotations(annotations);
+    const makeAnotherAnnotation = d3.annotation()
+                                    .type(d3.annotationCalloutCircle)
+                                    .accessors({
+                                        x: d => x(d.race) + x.bandwidth() / 2,
+                                        y: d => y(d.value)
+                                    })
+                                    .annotations(anotherAnnotation);
+
+    svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations);
+
+    svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnotherAnnotation);
+
 
 }
 
@@ -247,5 +368,4 @@ function ageHist(data) {
         .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
         .attr("y", function(d) { return y(d.length); })
         .attr("height", function(d) { return y(0) - y(d.length); });
-    
 }
