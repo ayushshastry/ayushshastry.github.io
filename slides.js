@@ -83,6 +83,14 @@ function schoolHist(data) {
         .attr("y", function(schoolArray) { return y(schoolArray.value); })
         .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
         .attr("width", x.bandwidth());
+    
+    svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 30)
+    .attr("x", -160)
+    .style('font-size', 13)
+    .text("Number of Arrests")
        
         const annotations = [
             {
@@ -178,7 +186,17 @@ function genderHist(data) {
         .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
         .attr("width", x.bandwidth());
 
-        // Add annotations
+    // add y axis label
+    svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 30)
+    .attr("x", -160)
+    .style('font-size', 13)
+    .text("Number of Arrests")
+
+
+    // Add annotations
     const annotations = [
         {
             note: {title: "Number of arrested Men: " + gendersArray[0].value},
@@ -216,7 +234,7 @@ function raceDist(data) {
     
     var margin = {right: 50, left: 80, top: 30, bottom: 150};
     var width = 1000 - margin.right - margin.left;
-    var height = 600 - margin.top - margin.bottom;
+    var height = 700 - margin.top - margin.bottom;
     
     const race = d3.rollup(data, function(v) { return v.length; }, function(d) { return d.race; });
     console.log(race);
@@ -265,6 +283,15 @@ function raceDist(data) {
         .attr("y", function(d) { return y(d.value); })
         .attr("height", function(d) { return y(0) - y(d.value);})
         .attr("width", x.bandwidth());
+    
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -200)
+            .style('font-size', 15)
+            .text("Number of Arrests")
+
     // Add annotations
     const annotations = [
         {
@@ -284,11 +311,11 @@ function raceDist(data) {
     const anotherAnnotation = [{
         note: {title: "Black and White Americans made up " + ((raceArray[1].value + raceArray[2].value) / 23510) * 100 + "% of all arrests from 2021-2023"},
         data: {race: raceArray[2].key, value: raceArray[2].value},
-        dy: 30,
-        dx: 70,
+        dy: 0,
+        dx: 90,
         subject: {
             radius: 30,
-            radiusPadding: 10
+            radiusPadding: 3
         }
     }];
 
@@ -368,4 +395,37 @@ function ageHist(data) {
         .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
         .attr("y", function(d) { return y(d.length); })
         .attr("height", function(d) { return y(0) - y(d.length); });
+    
+    svg.append("text")
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 30)
+    .attr("x", -160)
+    .style('font-size', 15)
+    .text("Number of Arrests")
+    
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", (width / 2) + 15)
+        .attr("y", height)
+        .style('font-size', 15)
+        .text("Age Groups");
+    
+    const annotations = [{
+        note: {label: "The most amount of arrests happened between ages 20-30. Arrests decline in older age groups"},
+        data: {age: 25, value : 7000},
+        dy: 30,
+        dx: 150
+    }];
+
+    const makeAnnotation = d3.annotation()
+                            .type(d3.annotationLabel)
+                            .accessors({
+                                x: function(d) { return x(d.age)},
+                                y: function(d) { return y(d.value)}
+                            })
+                            .annotations(annotations);
+    svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotation);
 }
