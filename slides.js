@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
             slideIndex++;
         }
         else {
-            slideIndex = 0;
+            slideIndex = slides.length - 1;
         }
         showSlide(slideIndex);
     }
@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
             slideIndex--;   
         }
         else {
-            slideIndex = slides.length - 1;
+            slideIndex = 0;
         }
         showSlide(slideIndex);
     }
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("width", 20)
             .attr("x", (height - margin.bottom))
             .attr("y", margin.left)
-            .transition().delay(function(d, i) { return i * 250; })
+            .transition().delay(function(d, i) { return i * 500; })
             .attr("x", function(gendersArray) { return x(gendersArray.key); })
             .attr("y", function(gendersArray) { return y(gendersArray.value); })
             .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("width", 20)
             .attr("x", (height))
             .attr("y", margin.left - 50)
-            .transition().delay(function(d, i) { return i * 250; })
+            .transition().delay(function(d, i) { return i * 400; })
             .attr("x", function(d) { return x(d.key); })
             .attr("y", function(d) { return y(d.value); })
             .attr("height", function(d) { return y(0) - y(d.value);})
@@ -329,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 note: {title: "Highest Number of Arrests: " + raceArray[1].value},
                 data: { race: raceArray[1].key, value: raceArray[1].value },
                 dy: -20,
-                dx: -75
+                dx: -100
             },
             {
                 note: {title: "Lowest Number of Arrests: " + raceArray[5].value},
@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("width", 20)
             .attr("x", (height - margin.bottom))
             .attr("y", margin.left)
-            .transition().delay(function(d, i) { return i * 250; })
+            .transition().delay(function(d, i) { return i * 300; })
             .attr("x", function(d) { return x(d.x0); })
             .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
             .attr("y", function(d) { return y(d.length); })
@@ -444,9 +444,10 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const annotations = [{
             note: {label: "The most amount of arrests happened between ages 20-30. Arrests decline in older age groups"},
+            bgPadding: 20,
             data: {age: 25, value : 7000},
             dy: 30,
-            dx: 150
+            dx: 80
         }];
 
         const makeAnnotation = d3.annotation()

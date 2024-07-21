@@ -5,9 +5,10 @@ body {
     text-align: center;
 }
 
-.slideshow {
+
+.slideshow-container {
     position: relative;
-    max-width: 1000px;
+    max-width: fit-content;
     margin: auto;
     overflow: hidden;
 }
@@ -29,6 +30,7 @@ body {
     transition: 0.5s ease;
     border-radius: 0 1px 1px 0;
     user-select: none;
+    position: relative;
 }
 
 .next {
