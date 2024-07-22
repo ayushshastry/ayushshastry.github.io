@@ -1,24 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // create slideshow
+
+    // select all HTML elements with slide class tag
     let slides = document.querySelectorAll(".slide");
+    // start at first slide
     let slideIndex = 0;
 
-    document.querySelector(".next").addEventListener("click", toggleNext);
-    document.querySelector(".prev").addEventListener("click", togglePrev);
+    // button to control forward motion through slideshow
 
     function toggleNext() {
+        // if there is another slide ahead, the user is allowed to proceed
         if (slideIndex < slides.length - 1) {
             slideIndex++;
         }
+        // if user is at the last slide of the slideshow, pressing next will not do anything
         else {
             slideIndex = slides.length - 1;
         }
+        // show the slide
         showSlide(slideIndex);
     }
 
     function togglePrev() {
+        // if there are slides behind the current one, the user is able to go back to them 
         if (slideIndex > 0) {
             slideIndex--;   
         }
+        // if the user is at the first slide, they cannot go back any further, current slide will stay at first one
         else {
             slideIndex = 0;
         }
@@ -26,25 +34,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function showSlide(index) {
+        // set all slides to none 
         slides.forEach(slide => slide.style.display = "none");
+        // display the one the user is currently on
         slides[index].style.display = "block";
     }
+
+    // add these buttons to event listener
+    document.querySelector(".next").addEventListener("click", toggleNext);
+    document.querySelector(".prev").addEventListener("click", togglePrev);
+
+    // let's start the show!
 
     showSlide(slideIndex);
 
     console.log("loading data");
 
+    // load data in first and then the rest will execute 
     d3.csv("arrestsUse.csv").then(function(data) {
+        // make sure data is loaded in
         console.log(data);
+        // get all the column names
         console.log("col names:", Object.keys(data[0]));
+        // define functions that will be implemented
         schoolHist(data);
         raceDist(data);
         genderHist(data);
         ageHist(data);
+        // defensive coding
     }).catch(function(error) {
         console.log(error);
     });
 
+    // confirmation that data has been loaded
     console.log("data loaded");
 
     function schoolHist(data) {
@@ -57,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const svg = d3.select("#schoolHistogram")
                         .append("svg")
-                        .attr("viewBox", [0, 0, width, height])
+                        // .attr("viewBox", [0, 0, width, height])
                         .attr("width", 700)
                         .attr("height", 400);
         
@@ -87,9 +109,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const y = d3.scaleLinear()
             .domain([0, 24000])
             .range([height - margin.bottom, margin.top]);
-        
+
+        // color the bars in the chart
         const coloring = d3.scaleOrdinal().domain(["0", "1"]).range(d3.schemeCategory10);
 
+        var tooltip = d3.select("#tooltip");
 
         // create axes
         svg.append("g")
@@ -99,56 +123,96 @@ document.addEventListener("DOMContentLoaded", () => {
         svg.append("g")
             .attr("transform", "translate("+margin.left+", "+0+")")
             .call(d3.axisLeft(y));
-        //var tooltip = d3.select("#tooltip");
 
-        svg.selectAll()
+        // now create the bar chart 
+        svg.selectAll("rect")
             .data(schoolArray)
-            .join("rect")
+            .enter().append("rect")
             .attr("fill", function(schoolArray) { return coloring(schoolArray.key); })
-            .attr("height", 20)
-            .attr("width", 20)
+            .style("border", 14)
             .attr("x", (height - margin.bottom))
             .attr("y", margin.left)
+            // bars will load in separately through this transition
             .transition().delay(function(d, i) { return i * 250; })
             .attr("x", function(schoolArray) { return x(schoolArray.key); })
             .attr("y", function(schoolArray) { return y(schoolArray.value); })
             .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
             .attr("width", x.bandwidth());
+
+        
+        svg.selectAll("rect")
+            .transition()
+            .delay(function(d, i) { return i * 250; })
+            .style('opacity', 1)
+        
+        svg.selectAll("rect")
+            .on('mouseover', function(event, schoolArray) {
+                tooltip.style("opacity", 1)
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY -28) + "px")
+                        .html("There were " + schoolArray.value + " arrests");
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
+        
+
+        // create the legends 
+        svg.append("circle")
+            .attr("cx",450)
+            .attr("cy",40)
+            .attr("r", 4)
+            .style("fill", "steelblue");
+
+        svg.append("text")
+            .attr("x", 460)
+            .attr("y", 40)
+            .text("Not near schools")
+            .style("font-size", "12px")
+            .attr("alignment-baseline","middle");
+        
+        svg.append("circle")
+            .attr("cx",450)
+            .attr("cy",60).attr("r", 4)
+            .style("fill", "orange");
+
+        svg.append("text")
+            .attr("x", 460)
+            .attr("y", 60)
+            .text("Near schools")
+            .style("font-size", "12px")
+            .attr("alignment-baseline","middle");
+            
         
         svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 30)
-        .attr("x", -160)
-        .style('font-size', 13)
-        .text("Number of Arrests")
-        
-            const annotations = [
-                {
-                    note: { label: "Not near schools: 21,508 arrests "},
-                    data: { school: "0", count: schoolArray[0].value},
-                    dy: 20,
-                    dx: 160
-                },
-                {
-                    note: { label: "Near school zones: 2,002 arrests " },
-                    data: { school: "1", count: schoolArray[1].value },
-                    dy: -40,
-                    dx: 70
-                }
-            ];
-        
-            const makeAnnotations = d3.annotation()
-                .type(d3.annotationLabel)
-                .accessors({
-                    x: d => x(d.school) + x.bandwidth() / 2.15,
-                    y: d => y(d.count)
-                })
-                .annotations(annotations);
-        
-            svg.append("g")
-                .attr("class", "annotation-group")
-                .call(makeAnnotations);
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -160)
+            .style('font-size', 13)
+            .text("Number of Arrests")
+
+        // create annotations
+        const annotations = [
+            {
+                note: { label: "91.5% of all arrests were made outside of school zones "},
+                data: { school: "0", count: schoolArray[0].value},
+                dy: 20,
+                dx: 160
+            }
+        ];
+    
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationLabel)
+            .accessors({
+                x: d => x(d.school) + x.bandwidth() / 2.15,
+                y: d => y(d.count)
+            })
+            .annotations(annotations);
+    
+        svg.append("g")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations);
     }
 
     function genderHist(data) {
@@ -161,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const svg = d3.select("#genderHistogram")
                         .append("svg")
-                        .attr("viewBox", [0, 0, width, height])
+                        // .attr("viewBox", [0, 0, width, height])
                         .attr("width", 700)
                         .attr("height", 400);
         
@@ -219,34 +283,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // add y axis label
         svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 30)
-        .attr("x", -160)
-        .style('font-size', 13)
-        .text("Number of Arrests")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -160)
+            .style('font-size', 13)
+            .text("Number of Arrests")
 
 
         // Add annotations
         const annotations = [
             {
-                note: {title: "Number of arrested Men: " + gendersArray[0].value},
+                note: {label: "78.9% of arrested individuals were men.\nThere is a massive imbalance between the two genders"},
                 data: { gender: gendersArray[0].key, value: gendersArray[0].value },
-                dy: -10,
-                dx: 10
-            },
-            {
-                note: {title: "Number of arrested Females: " + gendersArray[1].value},
-                data: { gender: gendersArray[1].key, value: gendersArray[1].value },
-                dy: -125,
-                dx: 25
+                dy: -40,
+                dx: -70,
+                bgPadding: 200
             }
         ];
 
         const makeAnnotations = d3.annotation()
-            .type(d3.annotationCallout)
+            .type(d3.annotationLabel)
             .accessors({
-                x: d => x(d.gender) + x.bandwidth() / 2,
+                x: d => x(d.gender) + x.bandwidth() / 2.15,
                 y: d => y(d.value)
             })
             .annotations(annotations);
@@ -260,6 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const svg = d3.select("#raceHistogram")
                     .append("svg")
+                    // .attr("viewBox", [0, 0, width, height])
                     .attr("width", 1000)
                     .attr("height", 600)
         
@@ -315,34 +375,40 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("height", function(d) { return y(0) - y(d.value);})
             .attr("width", x.bandwidth());
         
-            svg.append("text")
-                .attr("text-anchor", "middle")
-                .attr("transform", "rotate(-90)")
-                .attr("y", 30)
-                .attr("x", -200)
-                .style('font-size', 15)
-                .text("Number of Arrests")
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -150)
+            .style('font-size', 15)
+            .text("Number of Arrests")
 
         // Add annotations
-        const annotations = [
-            {
-                note: {title: "Highest Number of Arrests: " + raceArray[1].value},
-                data: { race: raceArray[1].key, value: raceArray[1].value },
-                dy: -20,
-                dx: -100
-            },
-            {
-                note: {title: "Lowest Number of Arrests: " + raceArray[5].value},
-                data: { race: raceArray[5].key, value: raceArray[5].value },
-                dy: -125,
-                dx: 25
-            },
-        ];
+        const annotation = [{
+            note: {title: "Black Americans made up " + ((raceArray[1].value) / 23510) * 100 + "% of all arrests."},
+            data: {race: raceArray[1].key, value: raceArray[1].value},
+            dy: 90,
+            dx: 250,
+            subject: {
+                radius: 30,
+                radiusPadding: 3
+            }
+        }];
+        const makeAnnotation = d3.annotation()
+                                        .type(d3.annotationCalloutCircle)
+                                        .accessors({
+                                            x: d => x(d.race) + x.bandwidth() / 2,
+                                            y: d => y(d.value)
+                                        })
+                                        .annotations(annotation);
+        svg.append("g")
+            .attr("class", "annotation-group")
+            .call(makeAnnotation);
 
         const anotherAnnotation = [{
-            note: {title: "Black and White Americans made up " + ((raceArray[1].value + raceArray[2].value) / 23510) * 100 + "% of all arrests from 2021-2023"},
+            note: {title: "White Americans made up " + ((raceArray[2].value) / 23510) * 100 + "% of all arrests."},
             data: {race: raceArray[2].key, value: raceArray[2].value},
-            dy: 0,
+            dy: -20,
             dx: 90,
             subject: {
                 radius: 30,
@@ -350,13 +416,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }];
 
-        const makeAnnotations = d3.annotation()
-            .type(d3.annotationCallout)
-            .accessors({
-                x: d => x(d.race) + x.bandwidth() / 2,
-                y: d => y(d.value)
-            })
-            .annotations(annotations);
         const makeAnotherAnnotation = d3.annotation()
                                         .type(d3.annotationCalloutCircle)
                                         .accessors({
@@ -367,18 +426,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         svg.append("g")
             .attr("class", "annotation-group")
-            .call(makeAnnotations);
-
-        svg.append("g")
-            .attr("class", "annotation-group")
             .call(makeAnotherAnnotation);
-
-
     }
 
     function ageHist(data) {
         const svg = d3.select("#ageHistogram")
                     .append("svg")
+                    // .attr("viewBox", [0, 0, width, height])
                     .attr("width", 700)
                     .attr("height", 400)
         
@@ -428,12 +482,12 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("height", function(d) { return y(0) - y(d.length); });
         
         svg.append("text")
-        .attr("text-anchor", "middle")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 30)
-        .attr("x", -160)
-        .style('font-size', 15)
-        .text("Number of Arrests")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -160)
+            .style('font-size', 15)
+            .text("Number of Arrests")
         
         svg.append("text")
             .attr("text-anchor", "middle")
@@ -453,8 +507,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const makeAnnotation = d3.annotation()
                                 .type(d3.annotationLabel)
                                 .accessors({
-                                    x: function(d) { return x(d.age)},
-                                    y: function(d) { return y(d.value)}
+                                    x: function(d) { return x(d.age); },
+                                    y: function(d) { return y(d.value); }
                                 })
                                 .annotations(annotations);
         svg.append("g")
