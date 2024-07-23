@@ -1,10 +1,31 @@
-body {
-    font-family:'Times New Roman', Times, serif;
-    margin: 0;
-    padding: 0;
-    text-align: center;
+* {
+    box-sizing: border-box;
+    margin: 6px;
 }
 
+body {
+    font-family:'Times New Roman', Times, serif;
+    margin: 5px;
+    padding: 5px;
+    text-align: center;
+    background-color: rgb(219, 215, 215);
+}
+
+#intro {
+    border: 2px solid black;
+    width: fit-content;
+    font-size: smaller;
+    text-align: left;
+    font-weight: bold;
+    margin-bottom: 10px;
+    box-shadow: 4px 4px 9px red;
+}
+
+
+h1 {
+    border: 3px solid black;
+    box-shadow: 4px 4px 9px red;
+}
 
 .slideshow-container {
     position: relative;
@@ -20,14 +41,16 @@ body {
 
 .prev, .next {
     cursor: pointer;
-    top: 20%;
+    margin-top: 2px;
+    text-align: center;
+    top: 50%;
     width: fit-content;
     padding: 16px;
     margin-top: -10px;
-    color: white;
+    color: black;
     font-weight: bold;
     font-size: 14px;
-    transition: 0.5s ease;
+    transition: 0.7s ease;
     border-radius: 0 4px 4px 0;
     user-select: none;
     position: relative;
@@ -44,8 +67,8 @@ body {
 }
 
 .prev:hover, .next:hover {
-    background-color: yellow;
-    color: black;
+    background-color: rgb(19, 19, 100);
+    color: white;
 }
 .annotation-note-title {
     font-size: 10px; /* Adjust title font size */
@@ -64,13 +87,45 @@ body {
 .tooltip {
     position: absolute;
     text-align: center;
-    width: 120px;
-    height: 28px;
-    padding: 2px;
+    width: fit-content;
+    height: fit-content;
+    padding: 4px;
     font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 0px;
+    background: rgb(117, 172, 244);
+    border: 3px solid black;
     border-radius: 8px;
     pointer-events: none;
-    opacity: 0;
+    box-shadow: 5px 5px 10px rgb(19, 19, 100);
+    z-index: 1;
+
+}
+
+#schoolHistogram {
+    box-shadow: 4px 4px 55px rgb(0, 0, 255);
+    border: 3px solid black;
+    padding-bottom: 10px;
+}
+
+#ageHistogram {
+    box-shadow: 4px 4px 55px blue;
+    border: 3px solid black;
+    padding-bottom: 10px;
+}
+
+#raceHistogram {
+    box-shadow: 4px 4px 55px blue;
+    border: 3px solid black;
+    padding-bottom: 10px;
+}
+
+#genderHistogram {
+    box-shadow: 4px 4px 55px blue;
+    border: 3px solid black;
+    padding-bottom: 10px;
+}
+
+#ethnicHistogram {
+    box-shadow: 4px 4px 55px blue;
+    border: 3px solid black;
+    padding-bottom: 10px;
 }

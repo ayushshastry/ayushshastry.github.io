@@ -61,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         raceDist(data);
         genderHist(data);
         ageHist(data);
+        ethnicHist(data);
         // defensive coding
     }).catch(function(error) {
         console.log(error);
@@ -81,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         .append("svg")
                         // .attr("viewBox", [0, 0, width, height])
                         .attr("width", 700)
-                        .attr("height", 400);
+                        .attr("height", 350);
         
 
         // get counts of each categorical variable
@@ -113,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // color the bars in the chart
         const coloring = d3.scaleOrdinal().domain(["0", "1"]).range(d3.schemeCategory10);
 
-        var tooltip = d3.select("#tooltip");
+        const tooltip = d3.select("#tooltip");
 
         // create axes
         svg.append("g")
@@ -133,23 +134,22 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("x", (height - margin.bottom))
             .attr("y", margin.left)
             // bars will load in separately through this transition
-            .transition().delay(function(d, i) { return i * 250; })
+            .transition().delay(function(d, i) { return i * 550; })
             .attr("x", function(schoolArray) { return x(schoolArray.key); })
             .attr("y", function(schoolArray) { return y(schoolArray.value); })
             .attr("height", function(schoolArray) { return y(0) - y(schoolArray.value);})
             .attr("width", x.bandwidth());
 
         
-        svg.selectAll("rect")
-            .transition()
-            .delay(function(d, i) { return i * 250; })
-            .style('opacity', 1)
+        // svg.transition()
+        //     .delay(function(d, i) { return i * 250; })
+        //     .style('opacity', 1)
         
         svg.selectAll("rect")
             .on('mouseover', function(event, schoolArray) {
                 tooltip.style("opacity", 1)
                         .style("left", (event.pageX) + "px")
-                        .style("top", (event.pageY -28) + "px")
+                        .style("top", (event.pageY) + "px")
                         .html("There were " + schoolArray.value + " arrests");
             })
             .on("mouseout", function() {
@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         .append("svg")
                         // .attr("viewBox", [0, 0, width, height])
                         .attr("width", 700)
-                        .attr("height", 400);
+                        .attr("height", 350);
         
 
         // get counts of each categorical variable
@@ -258,6 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const coloring = d3.scaleOrdinal().domain(["Male", "Female"]).range(d3.schemeCategory10);
 
+        var tooltip = d3.select("#tooltip");
+
         // create axes
         svg.append("g")
             .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
@@ -280,6 +282,17 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("y", function(gendersArray) { return y(gendersArray.value); })
             .attr("height", function(gendersArray) { return y(0) - y(gendersArray.value);})
             .attr("width", x.bandwidth());
+        
+        svg.selectAll("rect")
+        .on('mouseover', function(event, gendersArray) {
+            tooltip.style("opacity", 10)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY + 10) + "px")
+                    .html("There were " + gendersArray.value + " arrests");
+        })
+        .on("mouseout", function() {
+            tooltip.style("opacity", 0);
+        });
 
         // add y axis label
         svg.append("text")
@@ -320,8 +333,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const svg = d3.select("#raceHistogram")
                     .append("svg")
                     // .attr("viewBox", [0, 0, width, height])
-                    .attr("width", 1000)
-                    .attr("height", 600)
+                    .attr("width", 900)
+                    .attr("height", 350)
         
         var margin = {right: 50, left: 80, top: 30, bottom: 150};
         var width = 1000 - margin.right - margin.left;
@@ -352,6 +365,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const coloring = d3.scaleOrdinal().domain(raceArray.map(function(d) { return d.key; })).range(d3.schemeCategory10);
 
+        var tooltip = d3.select("#tooltip");
+
         svg.append("g")
             .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
             .call(d3.axisBottom(x))
@@ -374,6 +389,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("y", function(d) { return y(d.value); })
             .attr("height", function(d) { return y(0) - y(d.value);})
             .attr("width", x.bandwidth());
+        svg.selectAll("rect")
+            .on('mouseover', function(event, d) {
+                tooltip.style("opacity", 10)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY + 10) + "px")
+                        .html("There were " + d.value + " arrests");
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
         
         svg.append("text")
             .attr("text-anchor", "middle")
@@ -434,7 +459,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     .append("svg")
                     // .attr("viewBox", [0, 0, width, height])
                     .attr("width", 700)
-                    .attr("height", 400)
+                    .attr("height", 350)
         
         var margin = {right: 50, left: 80, top: 30, bottom: 40};
         var width = 700 - margin.right - margin.left;
@@ -455,9 +480,10 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(bins);
 
         const y = d3.scaleLinear()
-                    .domain([0, d3.max(bins, function(d) { return d.length; })])
+                    .domain([0, d3.max(bins, function(d) { return d.length + 1000; })])
                     .range([height - margin.bottom, margin.top]);
 
+        var tooltip = d3.select("#tooltip");
 
         svg.append("g")
             .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
@@ -480,6 +506,16 @@ document.addEventListener("DOMContentLoaded", () => {
             .attr("width", function(d) { return x(d.x1) - x(d.x0) - 1; })
             .attr("y", function(d) { return y(d.length); })
             .attr("height", function(d) { return y(0) - y(d.length); });
+        svg.selectAll("rect")
+            .on('mouseover', function(event, bins) {
+                tooltip.style("opacity", 10)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY + 10) + "px")
+                        .html("There were " + bins.length + " arrests");
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
         
         svg.append("text")
             .attr("text-anchor", "middle")
@@ -514,6 +550,125 @@ document.addEventListener("DOMContentLoaded", () => {
         svg.append("g")
             .attr("class", "annotation-group")
             .call(makeAnnotation);
+    }
+
+    function ethnicHist(data) {
+        // create margins and dimensions
+        var margin = {right: 50, left: 80, top: 30, bottom: 40};
+        var width = 700 - margin.right - margin.left;
+        var height = 400 - margin.top - margin.bottom;
+
+        // create svg container
+
+        const svg = d3.select("#ethnicHistogram")
+                        .append("svg")
+                        // .attr("viewBox", [0, 0, width, height])
+                        .attr("width", 700)
+                        .attr("height", 350);
+        
+
+        // get counts of each categorical variable
+
+        const ethnicity = d3.rollup(data, function(v) { return v.length; }, function(d) { return d.ethnicity; });
+        console.log(ethnicity.values());
+
+        for (let key of ethnicity.keys()) {
+            console.log(key);
+        }
+
+        for (let value of ethnicity.values()) {
+            console.log(value);
+        }
+
+        const ethnicityArray = Array.from(ethnicity, ([key, value]) => ({key, value}));
+        console.log(ethnicityArray);
+
+        // create scales
+        const x = d3.scaleBand()
+            .domain(["NON-HISPANIC", "HISPANIC"])
+            .range([margin.left, width - margin.right])
+            .padding(0.15);
+
+        const y = d3.scaleLinear()
+            .domain([0, 18000])
+            .range([height - margin.bottom, margin.top]);
+
+        // color the bars in the chart
+        const coloring = d3.scaleOrdinal().domain(["NON-HISPANIC", "HISPANIC"]).range(d3.schemeCategory10);
+
+        const tooltip = d3.select("#tooltip");
+
+        // create axes
+        svg.append("g")
+            .attr("transform", "translate(0," +(height - margin.bottom)+ ")")
+            .call(d3.axisBottom(x));
+        
+        svg.append("g")
+            .attr("transform", "translate("+margin.left+", "+0+")")
+            .call(d3.axisLeft(y));
+
+        // now create the bar chart 
+        svg.selectAll("rect")
+            .data(ethnicityArray)
+            .enter().append("rect")
+            .attr("fill", function(ethnicityArray) { return coloring(ethnicityArray.key); })
+            .style("border", 14)
+            .attr("x", (height - margin.bottom))
+            .attr("y", margin.left)
+            // bars will load in separately through this transition
+            .transition().delay(function(d, i) { return i * 250; })
+            .attr("x", function(ethnicityArray) { return x(ethnicityArray.key); })
+            .attr("y", function(ethnicityArray) { return y(ethnicityArray.value); })
+            .attr("height", function(ethnicityArray) { return y(0) - y(ethnicityArray.value);})
+            .attr("width", x.bandwidth());
+
+        
+        // svg.transition()
+        //     .delay(function(d, i) { return i * 250; })
+        //     .style('opacity', 1)
+        
+        svg.selectAll("rect")
+            .on('mouseover', function(event, ethnicityArray) {
+                tooltip.style("opacity", 1)
+                        .style("left", (event.pageX) + "px")
+                        .style("top", (event.pageY) + "px")
+                        .html("There were " + ethnicityArray.value + " arrests");
+            })
+            .on("mouseout", function() {
+                tooltip.style("opacity", 0);
+            });
+        
+            
+        
+        svg.append("text")
+            .attr("text-anchor", "middle")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30)
+            .attr("x", -160)
+            .style('font-size', 13)
+            .text("Number of Arrests")
+
+        // create annotations
+        const annotations = [
+            {
+                note: { label: "Non-hispanics made up the majority of the arrests: 69.5% of the arrests "},
+                data: { ethnicity: "NON-HISPANIC", count: ethnicityArray[0].value},
+                dy: -10,
+                dx: 100
+            }
+        ];
+    
+        const makeAnnotations = d3.annotation()
+            .type(d3.annotationLabel)
+            .accessors({
+                x: d => x(d.ethnicity) + x.bandwidth() / 2.15,
+                y: d => y(d.count)
+            })
+            .annotations(annotations);
+    
+        svg.append("g")
+            .attr("class", "annotation-group")
+            .call(makeAnnotations);
     }
 });
 

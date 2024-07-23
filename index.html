@@ -10,12 +10,19 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>
+    <h1 id="header">
         Interactive Slideshow for Police Arrests from 2021-2023
     </h1>
-    <h2>
-        This data is from Montgomery County, Maryland
-    </h2>
+    <div id="intro">
+        This data set presents all the arrests in Montogomery County, Maryland. 
+        Some factors that are presented in this data are: ethnicity, age, school zones, race and gender.
+        Throughout this slideshow, I'll be displaying how these arrests were distributed amongst the above factors.
+        At the end of the slideshow, I hope you'll be more educated on which groups of people were arrested proportionally more. 
+        Even though this data is contained to one county, there are enough observations to make inferences on the distribution of arrests in other counties across the country.
+        In this slideshow, you'll be able to get more details on the data points. 
+        A tooltip will appear by hovering your mouse over the point of interest.
+        The tooltip will look like the blue dot on the left of the screen.
+    </div>
     <div class="tooltip" id="tooltip"></div>
     <div id="slideshow" class="slideshow-container">
         <button class="prev" onclick="togglePrev()"> Previous </button>
@@ -35,6 +42,19 @@
         <div class="slide" id="slide4">
             <h3> Number of Arrests by Gender </h3>
             <div id="genderHistogram"> </div>
+        </div>
+        <div class="slide" id="slide5">
+            <h3> Number of Arrests by Ethnicity </h3>
+            <div id="ethnicHistogram"> </div>
+        </div>
+    </div>
+    <div id="thankYou">
+        I referred to these resources to help me build my visualizations.
+        <div id="links">
+            <a href="https://d3js.org/d3-transition" target="_blank"> D3 Documentation </a>
+        </div>
+        <div id="links">
+            <a href="https://observablehq.com/@d3/gallery" target="_blank"> D3 Gallery </a>
         </div>
     </div>
 </body>
